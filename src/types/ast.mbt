@@ -6,38 +6,23 @@ pub(all) struct Prog {
 
 ///|
 pub(all) struct Fn {
-  name : @utils.Ident
-  params : Array[@utils.Ident]
+  name : Ident
+  params : Array[Ident]
   body : Expr
   ty : Ty
 }
 
 ///|
 pub(all) enum Expr {
-  EVar(@utils.Ident)
+  EVar(Ident)
   EBool(Bool)
   ENum(Int)
-  ELam(@utils.Ident, Expr)
+  ELam(Ident, Expr)
   EApp(Expr, Expr)
-  ELets(Array[(@utils.Ident, Expr)], Expr)
+  ELets(Array[(Ident, Expr)], Expr)
   EIf(Expr, Expr, Expr)
   EBinary(Expr, BinOp, Expr)
   EArray(Array[Expr])
   EProj(Expr, Int)
   Assert(Expr, Ty)
 }
-
-///|
-pub(all) enum BinOp {
-  Add
-  Sub
-  Mul
-  Div
-  Mod
-  Beq
-  Bne
-  Bgt
-  Bge
-  Blt
-  Ble
-} derive(Eq, Show)

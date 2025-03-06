@@ -1,0 +1,2 @@
+///|
+pub(all) enum Value {}

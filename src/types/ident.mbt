@@ -1,0 +1,2 @@
+///|
+pub typealias Ident = String
