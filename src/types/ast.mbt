@@ -2,7 +2,8 @@
 pub(all) struct Prog {
   fns : Array[Fn]
   expr : Expr
-}
+  ty : Ty
+} derive(Show, Eq)
 
 ///|
 pub(all) struct Fn {
@@ -10,19 +11,17 @@ pub(all) struct Fn {
   params : Array[Ident]
   body : Expr
   ty : Ty
-}
+} derive(Show, Eq)
 
 ///|
 pub(all) enum Expr {
   EVar(Ident)
   EBool(Bool)
   ENum(Int)
-  ELam(Ident, Expr)
+  ELam(Array[Ident], Expr)
   EApp(Expr, Expr)
   ELets(Array[(Ident, Expr)], Expr)
   EIf(Expr, Expr, Expr)
   EBinary(Expr, BinOp, Expr)
-  EArray(Array[Expr])
-  EProj(Expr, Int)
   Assert(Expr, Ty)
-}
+} derive(Show, Eq)

@@ -3,7 +3,6 @@ pub(all) enum Ty {
   Unknown
   Boolean
   Integer
-  Arrow(Ty, Ty)
-  Arr(Array[Ty])
+  Arrow(Array[Ty], Ty)
   Rep(Ty)
 } derive(Eq, Show)
