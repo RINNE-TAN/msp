@@ -17,10 +17,7 @@ typealias In = @types.Expr
 typealias Out = @types.Comb
 
 ///|
-typealias Err = @types.StageError
-
-///|
-pub fn checkProg(prog : @types.Prog) -> @types.ProgComb!Err {
+pub fn checkProg(prog : @types.Prog) -> @types.ProgComb!Error {
   let fnGamma = prog.fns.fold(init=Env::empty(), fn {
     gamma, f => gamma.extend(f.name, f.ty)
   })
@@ -30,13 +27,13 @@ pub fn checkProg(prog : @types.Prog) -> @types.ProgComb!Err {
 }
 
 ///|
-fn checkFn(f : @types.Fn, fnGamma : Env[Ty]) -> @types.FnComb!Err {
+fn checkFn(f : @types.Fn, fnGamma : Env[Ty]) -> @types.FnComb!Error {
   let exprC = check!(Env::empty(), fnGamma, Static, f.expr, f.ty)
   @types.FnComb::{ name: f.name, expr: exprC }
 }
 
 ///|
-fn assertTy(expected~ : Ty, actual : Ty) -> Unit!Err {
+fn assertTy(expected~ : Ty, actual : Ty) -> Unit!Error {
   if expected != actual {
     raise @types.TypeMissmatch(expected~, actual~)
   }
@@ -49,7 +46,7 @@ fn check(
   n : Stage,
   term : In,
   expected : Ty
-) -> Out!Err {
+) -> Out!Error {
   match (n, expected) {
     (Static, Rep(expectedDyn)) =>
       match check?(gamma, fnGamma, Dynamic, term, expectedDyn) {
@@ -128,7 +125,7 @@ fn infer(
   fnGamma : Env[Ty],
   n : Stage,
   term : In
-) -> (Out, Ty)!Err {
+) -> (Out, Ty)!Error {
   match n {
     Static => ()
     Dynamic =>

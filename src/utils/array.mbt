@@ -4,10 +4,7 @@ pub fn zip[A, B](l : Array[A], r : Array[B]) -> Array[(A, B)] {
 }
 
 ///|
-pub fn traverse[A, B](
-  arr : Array[A],
-  f : (A) -> B!@types.StageError
-) -> Array[B]!@types.StageError {
+pub fn traverse[A, B, E : Error](arr : Array[A], f : (A) -> B!E) -> Array[B]!E {
   let res = []
   for a in arr {
     let b = f!(a)
