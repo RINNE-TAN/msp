@@ -18,18 +18,17 @@ typealias Out = @types.Comb
 
 ///|
 pub fn checkProg(prog : @types.Prog) -> @types.ProgComb!Error {
-  let fnGamma = prog.fns.fold(init=Env::empty(), fn {
+  let fnGamma = prog.tops.fold(init=Env::empty(), fn {
     gamma, f => gamma.extend(f.name, f.ty)
   })
-  let fnsC = @utils.traverse!(prog.fns, fn { f => checkFn!(f, fnGamma) })
-  let exprC = check!(Env::empty(), fnGamma, Static, prog.expr, prog.ty)
-  @types.ProgComb::{ fns: fnsC, expr: exprC }
+  let topsC = @utils.traverse!(prog.tops, fn { f => checkTop!(f, fnGamma) })
+  @types.ProgComb::{ tops: topsC }
 }
 
 ///|
-fn checkFn(f : @types.Fn, fnGamma : Env[Ty]) -> @types.FnComb!Error {
+fn checkTop(f : @types.Top, fnGamma : Env[Ty]) -> @types.TopComb!Error {
   let exprC = check!(Env::empty(), fnGamma, Static, f.expr, f.ty)
-  @types.FnComb::{ name: f.name, expr: exprC }
+  @types.TopComb::{ name: f.name, expr: exprC }
 }
 
 ///|

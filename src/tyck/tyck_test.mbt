@@ -1,18 +1,24 @@
 ///|
 test "tyck/lambda" {
-  let id42 = @types.Fn::{
-    name: "id42",
-    expr: ELam(["x"], ENum(42)),
-    ty: Arrow([Integer], Integer),
-  }
   let prog = @types.Prog::{
-    fns: [id42],
-    expr: EVar("id42"),
-    ty: Arrow([Integer], Integer),
+    tops: [
+      @types.Top::{
+        name: "id42",
+        expr: ELam(["x"], ENum(42)),
+        ty: Arrow([Integer], Integer),
+      },
+      @types.Top::{
+        name: "main",
+        expr: EVar("id42"),
+        ty: Arrow([Integer], Integer),
+      },
+    ],
   }
   let expected = @types.ProgComb::{
-    fns: [{ name: "id42", expr: CLam(["x"], CNum(42)) }],
-    expr: CVar("id42"),
+    tops: [
+      { name: "id42", expr: CLam(["x"], CNum(42)) },
+      { name: "main", expr: CVar("id42") },
+    ],
   }
   assert_eq!(checkProg!(prog), expected)
 }
@@ -20,19 +26,24 @@ test "tyck/lambda" {
 ///|
 test "tyck/app" {
   let prog = @types.Prog::{
-    fns: [
-      @types.Fn::{
+    tops: [
+      @types.Top::{
         name: "id42",
         expr: ELam(["x"], ENum(42)),
         ty: Arrow([Integer], Integer),
       },
+      @types.Top::{
+        name: "main",
+        expr: EApp(EVar("id42"), [ENum(13)]),
+        ty: Integer,
+      },
     ],
-    expr: EApp(EVar("id42"), [ENum(13)]),
-    ty: Integer,
   }
   let expected = @types.ProgComb::{
-    fns: [{ name: "id42", expr: CLam(["x"], CNum(42)) }],
-    expr: CApp(CVar("id42"), [CNum(13)]),
+    tops: [
+      { name: "id42", expr: CLam(["x"], CNum(42)) },
+      { name: "main", expr: CApp(CVar("id42"), [CNum(13)]) },
+    ],
   }
   assert_eq!(checkProg!(prog), expected)
 }
@@ -40,27 +51,35 @@ test "tyck/app" {
 ///|
 test "tyck/lets" {
   let prog = @types.Prog::{
-    fns: [],
-    expr: ELets(
-      [
-        ("x0", Assert(ENum(13), Integer)),
-        ("x1", EBinary(EVar("x0"), Add, EVar("x0"))),
-        ("x2", EBinary(EVar("x1"), Bgt, EVar("x0"))),
-      ],
-      EVar("x2"),
-    ),
-    ty: Boolean,
+    tops: [
+      @types.Top::{
+        name: "main",
+        expr: ELets(
+          [
+            ("x0", Assert(ENum(13), Integer)),
+            ("x1", EBinary(EVar("x0"), Add, EVar("x0"))),
+            ("x2", EBinary(EVar("x1"), Bgt, EVar("x0"))),
+          ],
+          EVar("x2"),
+        ),
+        ty: Boolean,
+      },
+    ],
   }
   let expected = @types.ProgComb::{
-    fns: [],
-    expr: CLets(
-      [
-        ("x0", CNum(13)),
-        ("x1", CBinary(CVar("x0"), Add, CVar("x0"))),
-        ("x2", CBinary(CVar("x1"), Bgt, CVar("x0"))),
-      ],
-      CVar("x2"),
-    ),
+    tops: [
+      {
+        name: "main",
+        expr: CLets(
+          [
+            ("x0", CNum(13)),
+            ("x1", CBinary(CVar("x0"), Add, CVar("x0"))),
+            ("x2", CBinary(CVar("x1"), Bgt, CVar("x0"))),
+          ],
+          CVar("x2"),
+        ),
+      },
+    ],
   }
   assert_eq!(checkProg!(prog), expected)
 }
@@ -68,8 +87,8 @@ test "tyck/lets" {
 ///|
 test "tyck/factorial" {
   let prog = @types.Prog::{
-    fns: [
-      @types.Fn::{
+    tops: [
+      @types.Top::{
         name: "factorial",
         expr: ELam(
           ["n"],
@@ -85,12 +104,15 @@ test "tyck/factorial" {
         ),
         ty: Arrow([Integer], Integer),
       },
+      @types.Top::{
+        name: "main",
+        expr: EApp(EVar("factorial"), [ENum(13)]),
+        ty: Integer,
+      },
     ],
-    expr: EApp(EVar("factorial"), [ENum(13)]),
-    ty: Integer,
   }
   let expected = @types.ProgComb::{
-    fns: [
+    tops: [
       {
         name: "factorial",
         expr: CLam(
@@ -106,8 +128,8 @@ test "tyck/factorial" {
           ),
         ),
       },
+      { name: "main", expr: CApp(CVar("factorial"), [CNum(13)]) },
     ],
-    expr: CApp(CVar("factorial"), [CNum(13)]),
   }
   assert_eq!(checkProg!(prog), expected)
 }
@@ -115,8 +137,8 @@ test "tyck/factorial" {
 ///|
 test "tyck/power" {
   let prog = @types.Prog::{
-    fns: [
-      @types.Fn::{
+    tops: [
+      @types.Top::{
         name: "power",
         expr: ELam(
           ["x", "n"],
@@ -132,12 +154,15 @@ test "tyck/power" {
         ),
         ty: Arrow([Integer, Integer], Integer),
       },
+      @types.Top::{
+        name: "main",
+        expr: EApp(EVar("power"), [ENum(2), ENum(13)]),
+        ty: Integer,
+      },
     ],
-    expr: EApp(EVar("power"), [ENum(2), ENum(13)]),
-    ty: Integer,
   }
   let expected = @types.ProgComb::{
-    fns: [
+    tops: [
       {
         name: "power",
         expr: CLam(
@@ -153,8 +178,8 @@ test "tyck/power" {
           ),
         ),
       },
+      { name: "main", expr: CApp(CVar("power"), [CNum(2), CNum(13)]) },
     ],
-    expr: CApp(CVar("power"), [CNum(2), CNum(13)]),
   }
   assert_eq!(checkProg!(prog), expected)
 }
@@ -162,8 +187,8 @@ test "tyck/power" {
 ///|
 test "tyck/power_stage" {
   let prog = @types.Prog::{
-    fns: [
-      @types.Fn::{
+    tops: [
+      @types.Top::{
         name: "power",
         expr: ELam(
           ["x", "n"],
@@ -179,12 +204,15 @@ test "tyck/power_stage" {
         ),
         ty: Arrow([Rep(Integer), Integer], Rep(Integer)),
       },
+      @types.Top::{
+        name: "main",
+        expr: ELam(["input"], EApp(EVar("power"), [EVar("input"), ENum(13)])),
+        ty: Rep(Arrow([Integer], Integer)),
+      },
     ],
-    expr: ELam(["input"], EApp(EVar("power"), [EVar("input"), ENum(13)])),
-    ty: Rep(Arrow([Integer], Integer)),
   }
   let expected = @types.ProgComb::{
-    fns: [
+    tops: [
       {
         name: "power",
         expr: CLam(
@@ -200,25 +228,28 @@ test "tyck/power_stage" {
           ),
         ),
       },
+      {
+        name: "main",
+        expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
+      },
     ],
-    expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
   }
   assert_eq!(checkProg!(prog), expected)
 }
 
 ///|
 test "tyck/power_stage_square" {
-  let even = @types.Fn::{
+  let even = @types.Top::{
     name: "even",
     expr: ELam(["x"], EBinary(EBinary(EVar("x"), Mod, ENum(2)), Beq, ENum(0))),
     ty: Arrow([Integer], Boolean),
   }
-  let square = @types.Fn::{
+  let square = @types.Top::{
     name: "square",
     expr: ELam(["x"], EBinary(EVar("x"), Mul, EVar("x"))),
     ty: Arrow([Integer], Integer),
   }
-  let power = @types.Fn::{
+  let power = @types.Top::{
     name: "power",
     expr: ELam(
       ["x", "n"],
@@ -240,13 +271,14 @@ test "tyck/power_stage_square" {
     ),
     ty: Arrow([Rep(Integer), Integer], Rep(Integer)),
   }
-  let prog = @types.Prog::{
-    fns: [even, square, power],
+  let main = @types.Top::{
+    name: "main",
     expr: ELam(["input"], EApp(EVar("power"), [EVar("input"), ENum(13)])),
     ty: Rep(Arrow([Integer], Integer)),
   }
+  let prog = @types.Prog::{ tops: [even, square, power, main] }
   let expected = @types.ProgComb::{
-    fns: [
+    tops: [
       {
         name: "even",
         expr: CLam(
@@ -282,25 +314,28 @@ test "tyck/power_stage_square" {
           ),
         ),
       },
+      {
+        name: "main",
+        expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
+      },
     ],
-    expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
   }
   assert_eq!(checkProg!(prog), expected)
 }
 
 ///|
 test "tyck/power_stage_rep_square" {
-  let even = @types.Fn::{
+  let even = @types.Top::{
     name: "even",
     expr: ELam(["x"], EBinary(EBinary(EVar("x"), Mod, ENum(2)), Beq, ENum(0))),
     ty: Arrow([Integer], Boolean),
   }
-  let square = @types.Fn::{
+  let square = @types.Top::{
     name: "square",
     expr: ELam(["x"], EBinary(EVar("x"), Mul, EVar("x"))),
     ty: Rep(Arrow([Integer], Integer)),
   }
-  let power = @types.Fn::{
+  let power = @types.Top::{
     name: "power",
     expr: ELam(
       ["x", "n"],
@@ -322,13 +357,14 @@ test "tyck/power_stage_rep_square" {
     ),
     ty: Arrow([Rep(Integer), Integer], Rep(Integer)),
   }
-  let prog = @types.Prog::{
-    fns: [even, square, power],
+  let main = @types.Top::{
+    name: "main",
     expr: ELam(["input"], EApp(EVar("power"), [EVar("input"), ENum(13)])),
     ty: Rep(Arrow([Integer], Integer)),
   }
+  let prog = @types.Prog::{ tops: [even, square, power, main] }
   let expected = @types.ProgComb::{
-    fns: [
+    tops: [
       {
         name: "even",
         expr: CLam(
@@ -367,8 +403,11 @@ test "tyck/power_stage_rep_square" {
           ),
         ),
       },
+      {
+        name: "main",
+        expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
+      },
     ],
-    expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
   }
   assert_eq!(checkProg!(prog), expected)
 }

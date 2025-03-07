@@ -1,12 +1,10 @@
 ///|
 pub(all) struct Prog {
-  fns : Array[Fn]
-  expr : Expr
-  ty : Ty
+  tops : Array[Top]
 } derive(Show, Eq)
 
 ///|
-pub(all) struct Fn {
+pub(all) struct Top {
   name : Ident
   expr : Expr
   ty : Ty

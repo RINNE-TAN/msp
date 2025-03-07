@@ -1,11 +1,10 @@
 ///|
 pub(all) struct ProgComb {
-  fns : Array[FnComb]
-  expr : Comb
+  tops : Array[TopComb]
 } derive(Show, Eq)
 
 ///|
-pub(all) struct FnComb {
+pub(all) struct TopComb {
   name : Ident
   expr : Comb
 } derive(Show, Eq)
