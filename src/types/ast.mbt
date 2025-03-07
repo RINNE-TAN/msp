@@ -8,8 +8,7 @@ pub(all) struct Prog {
 ///|
 pub(all) struct Fn {
   name : Ident
-  params : Array[Ident]
-  body : Expr
+  expr : Expr
   ty : Ty
 } derive(Show, Eq)
 
@@ -19,7 +18,7 @@ pub(all) enum Expr {
   EBool(Bool)
   ENum(Int)
   ELam(Array[Ident], Expr)
-  EApp(Expr, Expr)
+  EApp(Expr, Array[Expr])
   ELets(Array[(Ident, Expr)], Expr)
   EIf(Expr, Expr, Expr)
   EBinary(Expr, BinOp, Expr)
