@@ -205,3 +205,170 @@ test "tyck/power_stage" {
   }
   assert_eq!(checkProg!(prog), expected)
 }
+
+///|
+test "tyck/power_stage_square" {
+  let even = @types.Fn::{
+    name: "even",
+    expr: ELam(["x"], EBinary(EBinary(EVar("x"), Mod, ENum(2)), Beq, ENum(0))),
+    ty: Arrow([Integer], Boolean),
+  }
+  let square = @types.Fn::{
+    name: "square",
+    expr: ELam(["x"], EBinary(EVar("x"), Mul, EVar("x"))),
+    ty: Arrow([Integer], Integer),
+  }
+  let power = @types.Fn::{
+    name: "power",
+    expr: ELam(
+      ["x", "n"],
+      EIf(
+        EBinary(EVar("n"), Beq, ENum(0)),
+        ENum(1),
+        EIf(
+          EApp(EVar("even"), [EVar("n")]),
+          EApp(EVar("square"), [
+            EApp(EVar("power"), [EVar("x"), EBinary(EVar("n"), Div, ENum(2))]),
+          ]),
+          EBinary(
+            EVar("x"),
+            Mul,
+            EApp(EVar("power"), [EVar("x"), EBinary(EVar("n"), Sub, ENum(1))]),
+          ),
+        ),
+      ),
+    ),
+    ty: Arrow([Rep(Integer), Integer], Rep(Integer)),
+  }
+  let prog = @types.Prog::{
+    fns: [even, square, power],
+    expr: ELam(["input"], EApp(EVar("power"), [EVar("input"), ENum(13)])),
+    ty: Rep(Arrow([Integer], Integer)),
+  }
+  let expected = @types.ProgComb::{
+    fns: [
+      {
+        name: "even",
+        expr: CLam(
+          ["x"],
+          CBinary(CBinary(CVar("x"), Mod, CNum(2)), Beq, CNum(0)),
+        ),
+      },
+      { name: "square", expr: CLam(["x"], CBinary(CVar("x"), Mul, CVar("x"))) },
+      {
+        name: "power",
+        expr: CLam(
+          ["x", "n"],
+          CIf(
+            CBinary(CVar("n"), Beq, CNum(0)),
+            Lift(CNum(1)),
+            CIf(
+              CApp(CVar("even"), [CVar("n")]),
+              MkApp(CVar("square"), [
+                CApp(CVar("power"), [
+                  CVar("x"),
+                  CBinary(CVar("n"), Div, CNum(2)),
+                ]),
+              ]),
+              MkBinary(
+                CVar("x"),
+                Mul,
+                CApp(CVar("power"), [
+                  CVar("x"),
+                  CBinary(CVar("n"), Sub, CNum(1)),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      },
+    ],
+    expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
+  }
+  assert_eq!(checkProg!(prog), expected)
+}
+
+///|
+test "tyck/power_stage_rep_square" {
+  let even = @types.Fn::{
+    name: "even",
+    expr: ELam(["x"], EBinary(EBinary(EVar("x"), Mod, ENum(2)), Beq, ENum(0))),
+    ty: Arrow([Integer], Boolean),
+  }
+  let square = @types.Fn::{
+    name: "square",
+    expr: ELam(["x"], EBinary(EVar("x"), Mul, EVar("x"))),
+    ty: Rep(Arrow([Integer], Integer)),
+  }
+  let power = @types.Fn::{
+    name: "power",
+    expr: ELam(
+      ["x", "n"],
+      EIf(
+        EBinary(EVar("n"), Beq, ENum(0)),
+        ENum(1),
+        EIf(
+          EApp(EVar("even"), [EVar("n")]),
+          EApp(EVar("square"), [
+            EApp(EVar("power"), [EVar("x"), EBinary(EVar("n"), Div, ENum(2))]),
+          ]),
+          EBinary(
+            EVar("x"),
+            Mul,
+            EApp(EVar("power"), [EVar("x"), EBinary(EVar("n"), Sub, ENum(1))]),
+          ),
+        ),
+      ),
+    ),
+    ty: Arrow([Rep(Integer), Integer], Rep(Integer)),
+  }
+  let prog = @types.Prog::{
+    fns: [even, square, power],
+    expr: ELam(["input"], EApp(EVar("power"), [EVar("input"), ENum(13)])),
+    ty: Rep(Arrow([Integer], Integer)),
+  }
+  let expected = @types.ProgComb::{
+    fns: [
+      {
+        name: "even",
+        expr: CLam(
+          ["x"],
+          CBinary(CBinary(CVar("x"), Mod, CNum(2)), Beq, CNum(0)),
+        ),
+      },
+      {
+        name: "square",
+        expr: MkLam(["x"], MkBinary(CVar("x"), Mul, CVar("x"))),
+      },
+      {
+        name: "power",
+        expr: CLam(
+          ["x", "n"],
+          CIf(
+            CBinary(CVar("n"), Beq, CNum(0)),
+            Lift(CNum(1)),
+            CIf(
+              CApp(CVar("even"), [CVar("n")]),
+              MkApp(CVar("square"), [
+                CApp(CVar("power"), [
+                  CVar("x"),
+                  CBinary(CVar("n"), Div, CNum(2)),
+                ]),
+              ]),
+              MkBinary(
+                CVar("x"),
+                Mul,
+                CApp(CVar("power"), [
+                  CVar("x"),
+                  CBinary(CVar("n"), Sub, CNum(1)),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      },
+    ],
+    expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
+  }
+  assert_eq!(checkProg!(prog), expected)
+}
