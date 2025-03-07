@@ -1,2 +1,32 @@
 ///|
-pub(all) enum Value {}
+pub(all) struct TopValue {
+  name : Ident
+  expr : Value
+} derive(Show, Eq)
+
+///|
+pub(all) enum Value {
+  VNum(Int)
+  VBool(Bool)
+  VClosure(Array[Ident], Comb, Env[Value])
+  VCode(Effs, Ident)
+} derive(Eq, Show)
+
+///|
+pub fn Value::castVCode(self : Value) -> (Effs, Ident) {
+  match self {
+    VCode(effs, z) => (effs, z)
+    _ => abort("unreachable")
+  }
+}
+
+///|
+pub(all) type Effs Array[(String, Comb)] derive(Eq, Show)
+
+///|
+pub fn Effs::op_add(self : Effs, other : Effs) -> Effs {
+  match (self, other) {
+    (Effs(binds0), Effs(binds1)) =>
+      binds0 + binds1.filter(fn { eff => not(binds0.contains(eff)) })
+  }
+}

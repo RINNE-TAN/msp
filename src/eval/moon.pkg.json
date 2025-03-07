@@ -1,0 +1,6 @@
+{
+    "import": [
+        "kamome/msp/types",
+        "kamome/msp/utils"
+    ]
+}

@@ -219,7 +219,7 @@ test "tyck/power_stage" {
           ["x", "n"],
           CIf(
             CBinary(CVar("n"), Beq, CNum(0)),
-            Lift(CNum(1)),
+            MkNum(1),
             MkBinary(
               CVar("x"),
               Mul,
@@ -293,7 +293,7 @@ test "tyck/power_stage_square" {
           ["x", "n"],
           CIf(
             CBinary(CVar("n"), Beq, CNum(0)),
-            Lift(CNum(1)),
+            MkNum(1),
             CIf(
               CApp(CVar("even"), [CVar("n")]),
               MkApp(CVar("square"), [
@@ -382,7 +382,7 @@ test "tyck/power_stage_rep_square" {
           ["x", "n"],
           CIf(
             CBinary(CVar("n"), Beq, CNum(0)),
-            Lift(CNum(1)),
+            MkNum(1),
             CIf(
               CApp(CVar("even"), [CVar("n")]),
               MkApp(CVar("square"), [

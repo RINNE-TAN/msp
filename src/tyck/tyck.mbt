@@ -19,16 +19,16 @@ typealias Out = @types.Comb
 ///|
 pub fn checkProg(prog : @types.Prog) -> @types.ProgComb!Error {
   let fnGamma = prog.tops.fold(init=Env::empty(), fn {
-    gamma, f => gamma.extend(f.name, f.ty)
+    gamma, top => gamma.extend(top.name, top.ty)
   })
-  let topsC = @utils.traverse!(prog.tops, fn { f => checkTop!(f, fnGamma) })
+  let topsC = @utils.traverse!(prog.tops, fn { top => checkTop!(top, fnGamma) })
   @types.ProgComb::{ tops: topsC }
 }
 
 ///|
-fn checkTop(f : @types.Top, fnGamma : Env[Ty]) -> @types.TopComb!Error {
-  let exprC = check!(Env::empty(), fnGamma, Static, f.expr, f.ty)
-  @types.TopComb::{ name: f.name, expr: exprC }
+fn checkTop(top : @types.Top, fnGamma : Env[Ty]) -> @types.TopComb!Error {
+  let exprC = check!(Env::empty(), fnGamma, Static, top.expr, top.ty)
+  @types.TopComb::{ name: top.name, expr: exprC }
 }
 
 ///|
@@ -59,14 +59,14 @@ fn check(
       assertTy!(expected~, Boolean)
       match n {
         Static => CBool(b)
-        Dynamic => Lift(CBool(b))
+        Dynamic => MkBool(b)
       }
     }
     ENum(i) => {
       assertTy!(expected~, Integer)
       match n {
         Static => CNum(i)
-        Dynamic => Lift(CNum(i))
+        Dynamic => MkNum(i)
       }
     }
     ELam(xs, t) =>
