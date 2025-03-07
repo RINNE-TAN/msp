@@ -21,7 +21,7 @@ pub fn checkProg(prog : @types.Prog) -> @types.ProgComb!Error {
   let fnGamma = prog.tops.fold(init=Env::empty(), fn {
     gamma, top => gamma.extend(top.name, top.ty)
   })
-  let topsC = @utils.traverse!(prog.tops, fn { top => checkTop!(top, fnGamma) })
+  let topsC = @utils.mapM!(prog.tops, fn { top => checkTop!(top, fnGamma) })
   @types.ProgComb::{ tops: topsC }
 }
 
@@ -147,7 +147,11 @@ fn infer(
             (Dynamic, Static) => raise @types.StageAntiControl(var~)
             (Dynamic, Dynamic) => (CVar(var), ty)
           }
-        Err(_) => (CVar(var), fnGamma.get!(var))
+        Err(_) =>
+          match n {
+            Static => (CVar(var), fnGamma.get!(var))
+            Dynamic => raise @types.CrossStagePersistence(var~)
+          }
       }
     EApp(f, args) =>
       match infer!(gamma, fnGamma, n, f) {
@@ -155,7 +159,7 @@ fn infer(
           if args.length() != xsTy.length() {
             raise @types.ArgNumMissmatch
           } else {
-            let argsC = @utils.traverse!(@utils.zip(args, xsTy), fn {
+            let argsC = @utils.mapM!(@utils.zip(args, xsTy), fn {
               (arg, argTy) => check!(gamma, fnGamma, n, arg, argTy)
             })
             match n {

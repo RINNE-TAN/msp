@@ -10,9 +10,10 @@ typealias In = @types.Comb
 ///|
 pub fn evalProg(prog : @types.ProgComb) -> @types.ProgComb!Error {
   @types.ProgComb::{
-    tops: @utils.traverse!(prog.tops, fn {
-      top => evalTop!(topGamma!(prog), top)
-    }),
+    tops: @utils.mapM!(prog.tops, fn { top => evalTop!(topGamma!(prog), top) }).filter_map(fn {
+        top => top
+      },
+    ),
   }
 }
 
@@ -44,25 +45,17 @@ fn topGamma(prog : @types.ProgComb) -> Env[V]!Error {
 }
 
 ///|
-fn evalTop(topGamma : Env[V], top : @types.TopComb) -> @types.TopComb!Error {
-  @types.TopComb::{
-    name: top.name,
-    expr: reify(eval!(Env::empty(), topGamma, top.expr)),
-  }
+fn evalTop(topGamma : Env[V], top : @types.TopComb) -> @types.TopComb?!Error {
+  reify(eval!(Env::empty(), topGamma, top.expr)).map(fn {
+    expr => @types.TopComb::{ name: top.name, expr }
+  })
 }
 
 ///|
-fn reify(value : V) -> In {
+fn reify(value : V) -> In? {
   match value {
-    VNum(i) => CNum(i)
-    VBool(b) => CBool(b)
-    VClosure(xs, t, gamma) =>
-      if gamma == Env::empty() {
-        CLam(xs, t)
-      } else {
-        abort("unreachable")
-      }
-    VCode(Effs(effs), x) => CLets(effs, CVar(x))
+    VCode(Effs(effs), x) => Some(CLets(effs, CVar(x)))
+    _ => None
   }
 }
 
@@ -72,15 +65,17 @@ fn eval(gamma : Env[V], topGamma : Env[V], term : In) -> V!Error {
     CVar(x) =>
       match gamma.get?(x) {
         Ok(value) => value
-        Err(_) => topGamma.get!(x)
+        Err(_) =>
+          match topGamma.get!(x) {
+            VCode(_) => VCode([], x)
+            others => others
+          }
       }
     CBool(b) => VBool(b)
     CNum(i) => VNum(i)
     CLam(xs, t) => VClosure(xs, t, gamma)
     CApp(f, args) => {
-      let argVs = @utils.traverse!(args, fn {
-        arg => eval!(gamma, topGamma, arg)
-      })
+      let argVs = @utils.mapM!(args, fn { arg => eval!(gamma, topGamma, arg) })
       match eval!(gamma, topGamma, f) {
         VClosure(xs, t, gamma) => {
           let newGamma = @utils.zip(xs, argVs).fold(init=gamma, fn {
@@ -139,7 +134,7 @@ fn eval(gamma : Env[V], topGamma : Env[V], term : In) -> V!Error {
     }
     MkApp(f, args) => {
       let (eff0, fZ) = eval!(gamma, topGamma, f).castVCode()
-      let argsCode = @utils.traverse!(args, fn {
+      let argsCode = @utils.mapM!(args, fn {
         arg => eval!(gamma, topGamma, arg).castVCode()
       })
       let x = @utils.fresh("x")

@@ -4,7 +4,7 @@ pub fn zip[A, B](l : Array[A], r : Array[B]) -> Array[(A, B)] {
 }
 
 ///|
-pub fn traverse[A, B, E : Error](arr : Array[A], f : (A) -> B!E) -> Array[B]!E {
+pub fn mapM[A, B, E : Error](arr : Array[A], f : (A) -> B!E) -> Array[B]!E {
   let res = []
   for a in arr {
     let b = f!(a)
