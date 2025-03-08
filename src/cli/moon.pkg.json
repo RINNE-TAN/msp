@@ -1,0 +1,17 @@
+{
+    "import": [
+        {
+            "path": "Yoorkin/ArgParser",
+            "alias": "arg"
+        },
+        {
+            "path": "Yoorkin/prettyprinter",
+            "alias": "pp"
+        },
+        "moonbitlang/x/fs",
+        "kamome/msp/parser",
+        "kamome/msp/tyck",
+        "kamome/msp/eval",
+        "kamome/msp/types"
+    ]
+}

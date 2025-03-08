@@ -1,4 +1,7 @@
 ///|
 fn main {
-  println("hello")
+  match @cli.cli?() {
+    Ok(_) => ()
+    Err(err) => println(err)
+  }
 }

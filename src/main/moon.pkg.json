@@ -1,4 +1,6 @@
 {
   "is-main": true,
-  "import": []
+  "import": [
+    "kamome/msp/cli"
+  ]
 }

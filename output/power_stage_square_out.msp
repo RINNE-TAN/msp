@@ -1,0 +1,21 @@
+square =
+  let
+    f_1 = lambda x.
+      let
+        x_0 = (x * x)
+      in x_0
+  in f_1
+
+main =
+  let
+    f_7 = lambda input.
+      let
+        i_0 = 1
+        x_1 = (input * i_0)
+        x_2 = square(x_1)
+        x_3 = (input * x_2)
+        x_4 = square(x_3)
+        x_5 = square(x_4)
+        x_6 = (input * x_5)
+      in x_6
+  in f_7

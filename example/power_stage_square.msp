@@ -1,0 +1,20 @@
+even : (int) => bool = 
+  lambda x.
+    x % 2 == 0 
+      
+square : <(int) => int> = 
+  lambda x.
+    x * x
+
+power : (<int>, int) => <int> = 
+  lambda x n.
+    if n == 0
+      then 1
+      else 
+        if even(n)
+          then square(power(x, n / 2))
+          else x * power(x, n - 1)
+
+main : <(int) => int> = 
+  lambda input.
+    power(input, 13)

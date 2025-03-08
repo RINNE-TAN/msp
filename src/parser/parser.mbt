@@ -103,19 +103,6 @@ let passert : Parser[@types.Expr] = psymbol(LBracket)
   .map(fn { ((((_, expr), _), ty), _) => @types.Assert(expr, ty) })
 
 ///|
-let papp : Parser[@types.Expr] = {
-  let pcall = psymbol(LParen)
-    .and_then(pequality.repeat_with_sep(psymbol(Comma)))
-    .and_then(psymbol(RParen))
-    .map(fn { ((_, args), _) => args })
-  pequality
-  .and_then(pcall.repeat())
-  .map(fn {
-    (init, tails) => tails.fold(init~, fn { f, args => @types.EApp(f, args) })
-  })
-}
-
-///|
 let pequality : Parser[@types.Expr] = {
   fn parithOp() -> Parser[@types.BinOp] {
     @combinator.pvalue(fn {
@@ -172,11 +159,24 @@ let pcombine : Parser[@types.Expr] = {
         _ => None
       }
   })
-  patomic
-  .and_then(pcombineOp.and_then(patomic).repeat())
+  papp
+  .and_then(pcombineOp.and_then(papp).repeat())
   .map(fn {
     (init, tails) =>
       tails.fold(init~, fn { l, (op, r) => @types.EBinary(l, op, r) })
+  })
+}
+
+///|
+let papp : Parser[@types.Expr] = {
+  let pcall = psymbol(LParen)
+    .and_then(pexpr_deref().repeat_with_sep(psymbol(Comma)))
+    .and_then(psymbol(RParen))
+    .map(fn { ((_, args), _) => args })
+  patomic
+  .and_then(pcall.repeat())
+  .map(fn {
+    (init, tails) => tails.fold(init~, fn { f, args => @types.EApp(f, args) })
   })
 }
 
@@ -190,7 +190,7 @@ fn pexpr_deref() -> Parser[@types.Expr] {
 
 ///|
 pub let pexpr : Parser[@types.Expr] = {
-  pexprRef.val = papp
+  pexprRef.val = pequality
   pexpr_deref()
 }
 

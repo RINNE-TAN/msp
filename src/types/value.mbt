@@ -12,7 +12,7 @@ pub(all) enum Value {
   VCode(Effs, Ident)
 } derive(Eq, Show)
 
-///|
+///| @coverage.skip
 pub fn Value::castVCode(self : Value) -> (Effs, Ident) {
   match self {
     VCode(effs, z) => (effs, z)
