@@ -8,4 +8,6 @@ pub(all) type! StageError {
   ArgNumMismatch
   CircularReference(vars~ : Array[Ident])
   LexerRemain(remain~ : String)
+  ParserRemain(remain~ : String)
+  ParserError
 } derive(Show)

@@ -37,7 +37,7 @@ let lsymbol : Lexer[Token] = @combinator.one_of([
 ]).map(fn {
   symbol =>
     match symbol {
-      "=>" => Symbol(Arr) // =>
+      "=>" => Symbol(Arrow) // =>
       "==" => Symbol(Eq) // ==
       "!=" => Symbol(NE) // !=
       ">=" => Symbol(GE) // >=
@@ -63,18 +63,20 @@ let lsymbol : Lexer[Token] = @combinator.one_of([
 
 ///|
 let lkeyword : Lexer[Token] = @combinator.one_of([
-  "lambda", "if", "then", "else", "true", "false", "int", "bool",
+  "lambda", "if", "then", "else", "true", "false", "int", "bool", "let", "in",
 ]).map(fn {
   keyword =>
     match keyword {
-      "lambda" => KeyWord(Lambda)
-      "if" => KeyWord(If)
-      "then" => KeyWord(Then)
-      "else" => KeyWord(Else)
-      "true" => KeyWord(True)
-      "false" => KeyWord(False)
-      "int" => KeyWord(Int)
-      "bool" => KeyWord(Bool)
+      "lambda" => Keyword(Lambda)
+      "if" => Keyword(If)
+      "then" => Keyword(Then)
+      "else" => Keyword(Else)
+      "true" => Keyword(True)
+      "false" => Keyword(False)
+      "int" => Keyword(Int)
+      "bool" => Keyword(Bool)
+      "let" => Keyword(Let)
+      "in" => Keyword(In)
       _ => abort("unreachable")
     }
 })
@@ -93,9 +95,9 @@ let lvariable : Lexer[Token] = @combinator.pchar_such_that(is_name_start_char)
   })
 
 ///|
-let lwhite_spaces : Lexer[Token] = @combinator.pchar_such_that(is_ws)
+let lwhite_spaces : Lexer[Unit] = @combinator.pchar_such_that(is_ws)
   .repeat()
-  .map(fn { _ => WS })
+  .map(fn { _ => () })
 
 ///|
 let ltoken : Lexer[Token] = lnumber
@@ -104,10 +106,11 @@ let ltoken : Lexer[Token] = lnumber
   .or_else(lvariable)
 
 ///|
-let ltokens : Lexer[Array[Token]] = ltoken
-  .repeat_with_sep(lwhite_spaces)
+let ltokens : Lexer[Array[Token]] = lwhite_spaces
+  .and_then(ltoken.repeat_with_sep(lwhite_spaces))
   .and_then(lwhite_spaces)
   .omit_second()
+  .omit_first()
 
 ///|
 pub fn lexer(input : String) -> Array[Token]!Error {

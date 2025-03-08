@@ -11,8 +11,8 @@ test "lexer/number" {
 
 ///|
 test "lexer/keyword" {
-  assert_eq!(lexer!("lambda"), [KeyWord(Lambda)])
-  assert_eq!(lexer!("if"), [KeyWord(If)])
+  assert_eq!(lexer!("lambda"), [Keyword(Lambda)])
+  assert_eq!(lexer!("if"), [Keyword(If)])
 }
 
 ///|
@@ -27,7 +27,7 @@ test "lexer/exp" {
     Variable("z"),
   ])
   assert_eq!(lexer!("lambda x y z.x + y + z"), [
-    KeyWord(Lambda),
+    Keyword(Lambda),
     Variable("x"),
     Variable("y"),
     Variable("z"),
@@ -39,19 +39,19 @@ test "lexer/exp" {
     Variable("z"),
   ])
   assert_eq!(lexer!("if true then true else false"), [
-    KeyWord(If),
-    KeyWord(True),
-    KeyWord(Then),
-    KeyWord(True),
-    KeyWord(Else),
-    KeyWord(False),
+    Keyword(If),
+    Keyword(True),
+    Keyword(Then),
+    Keyword(True),
+    Keyword(Else),
+    Keyword(False),
   ])
   assert_eq!(lexer!("if x then y else z"), [
-    KeyWord(If),
+    Keyword(If),
     Variable("x"),
-    KeyWord(Then),
+    Keyword(Then),
     Variable("y"),
-    KeyWord(Else),
+    Keyword(Else),
     Variable("z"),
   ])
 }
@@ -61,22 +61,22 @@ test "lexer/type" {
   assert_eq!(lexer!("([int]) => bool"), [
     Symbol(LParen),
     Symbol(LBracket),
-    KeyWord(Int),
+    Keyword(Int),
     Symbol(RBracket),
     Symbol(RParen),
-    Symbol(Arr),
-    KeyWord(Bool),
+    Symbol(Arrow),
+    Keyword(Bool),
   ])
   assert_eq!(lexer!("([int], bool) => bool"), [
     Symbol(LParen),
     Symbol(LBracket),
-    KeyWord(Int),
+    Keyword(Int),
     Symbol(RBracket),
     Symbol(Comma),
-    KeyWord(Bool),
+    Keyword(Bool),
     Symbol(RParen),
-    Symbol(Arr),
-    KeyWord(Bool),
+    Symbol(Arrow),
+    Keyword(Bool),
   ])
 }
 
@@ -87,13 +87,13 @@ test "lexer/top" {
     Symbol(Colon),
     Symbol(LBracket),
     Symbol(LParen),
-    KeyWord(Int),
+    Keyword(Int),
     Symbol(RParen),
-    Symbol(Arr),
-    KeyWord(Int),
+    Symbol(Arrow),
+    Keyword(Int),
     Symbol(RBracket),
     Symbol(Ass),
-    KeyWord(Lambda),
+    Keyword(Lambda),
     Variable("x"),
     Symbol(Dot),
     Variable("x"),
@@ -108,12 +108,12 @@ test "lexer/top" {
     Variable("id"),
     Symbol(Colon),
     Symbol(LParen),
-    KeyWord(Int),
+    Keyword(Int),
     Symbol(RParen),
-    Symbol(Arr),
-    KeyWord(Int),
+    Symbol(Arrow),
+    Keyword(Int),
     Symbol(Ass),
-    KeyWord(Lambda),
+    Keyword(Lambda),
     Variable("x"),
     Symbol(Dot),
     Variable("x"),
@@ -121,13 +121,13 @@ test "lexer/top" {
     Symbol(Colon),
     Symbol(LBracket),
     Symbol(LParen),
-    KeyWord(Int),
+    Keyword(Int),
     Symbol(RParen),
-    Symbol(Arr),
-    KeyWord(Int),
+    Symbol(Arrow),
+    Keyword(Int),
     Symbol(RBracket),
     Symbol(Ass),
-    KeyWord(Lambda),
+    Keyword(Lambda),
     Variable("x"),
     Symbol(Dot),
     Variable("id"),

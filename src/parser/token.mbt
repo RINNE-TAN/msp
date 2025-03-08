@@ -2,15 +2,13 @@
 pub(all) enum Token {
   Number(Int)
   Symbol(Symbol)
-  KeyWord(Keyword)
+  Keyword(Keyword)
   Variable(String)
-  WS // ' ' '\t' '\r' '\n'
-  EOF
 } derive(Eq, Show)
 
 ///|
 pub(all) enum Symbol {
-  Arr // =>
+  Arrow // =>
   Eq // ==
   NE // !=
   GE // >=
@@ -42,4 +40,6 @@ pub(all) enum Keyword {
   False // false
   Int // int
   Bool // bool
+  Let // let
+  In // in
 } derive(Eq, Show)
