@@ -226,6 +226,19 @@ let pty : Parser[@types.Ty] = {
 }
 
 ///|
+let ptop : Parser[@types.Top] = pident
+  .and_then(psymbol(Colon))
+  .and_then(pty)
+  .and_then(psymbol(Ass))
+  .and_then(pexpr)
+  .map(fn { ((((name, _), ty), _), expr) => @types.Top::{ name, expr, ty } })
+
+///|
+pub let pprog : Parser[@types.Prog] = ptop
+  .repeat()
+  .map(fn { tops => @types.Prog::{ tops, } })
+
+///|
 pub fn parse[Value](p : Parser[Value], input : String) -> Value!Error {
   match p.parse(@combinator.Seq::from_array(lexer!(input)[:])) {
     Some((value, seq)) =>

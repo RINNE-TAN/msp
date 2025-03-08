@@ -133,3 +133,27 @@ test "parser/let_nest" {
   )
   assert_eq!(parse!(pexpr, input), expected)
 }
+
+///|
+test "parser/prog" {
+  let input =
+    #|id : (int) => int = 
+    #|  lambda x.x
+    #|add : (int, int) => int = 
+    #|  lambda x y.x + y
+  let expected : @types.Prog = {
+    tops: [
+      {
+        name: "id",
+        expr: ELam(["x"], EVar("x")),
+        ty: Arrow([Integer], Integer),
+      },
+      {
+        name: "add",
+        expr: ELam(["x", "y"], EBinary(EVar("x"), Add, EVar("y"))),
+        ty: Arrow([Integer, Integer], Integer),
+      },
+    ],
+  }
+  assert_eq!(parse!(pprog, input), expected)
+}
