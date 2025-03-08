@@ -34,7 +34,7 @@ fn checkTop(top : @types.Top, fnGamma : Env[Ty]) -> @types.TopComb!Error {
 ///|
 fn assertTy(expected~ : Ty, actual : Ty) -> Unit!Error {
   if expected != actual {
-    raise @types.TypeMissmatch(expected~, actual~)
+    raise @types.TypeMismatch(expected~, actual~)
   }
 }
 
@@ -73,7 +73,7 @@ fn check(
       match expected {
         Arrow(xsTy, tTy) =>
           if xsTy.length() != xs.length() {
-            raise @types.ArgNumMissmatch
+            raise @types.ArgNumMismatch
           } else {
             let newGamma = @utils.zip(xs, xsTy).fold(init=gamma, fn {
               gamma, (x, xTy) => gamma.extend(x, (n, xTy))
@@ -84,7 +84,7 @@ fn check(
               Dynamic => MkLam(xs, tC)
             }
           }
-        _ => raise @types.TypeMissmatch(expected~, actual=Arrow([], Unknown))
+        _ => raise @types.TypeMismatch(expected~, actual=Arrow([], Unknown))
       }
     ELets(binds, t) => {
       let bindsC = []
@@ -157,7 +157,7 @@ fn infer(
       match infer!(gamma, fnGamma, n, f) {
         (fC, Arrow(xsTy, tTy)) =>
           if args.length() != xsTy.length() {
-            raise @types.ArgNumMissmatch
+            raise @types.ArgNumMismatch
           } else {
             let argsC = @utils.mapM!(@utils.zip(args, xsTy), fn {
               (arg, argTy) => check!(gamma, fnGamma, n, arg, argTy)
@@ -168,7 +168,7 @@ fn infer(
             }
           }
         (_, fTy) =>
-          raise @types.TypeMissmatch(expected=Arrow([], Unknown), actual=fTy)
+          raise @types.TypeMismatch(expected=Arrow([], Unknown), actual=fTy)
       }
     EBinary(l, op, r) => {
       let lC = check!(gamma, fnGamma, n, l, Integer)
