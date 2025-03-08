@@ -1,5 +1,5 @@
 ///|
-pub(all) type Env[A] @immut/hashmap.T[String, A]
+pub(all) type Env[A] @immut/hashmap.T[String, A] derive(Show)
 
 ///|
 pub impl[A : Eq] Eq for Env[A] with op_equal(self : Env[A], other : Env[A]) {
@@ -7,20 +7,6 @@ pub impl[A : Eq] Eq for Env[A] with op_equal(self : Env[A], other : Env[A]) {
     (Env(self), Env(other)) =>
       self.iter().all(fn(kv) { other[kv.0].map_or(false, fn(v) { v == kv.1 }) }) &&
       self.size() == other.size()
-  }
-}
-
-///|
-pub impl[A : Show] Show for Env[A] with to_string(self) {
-  match self {
-    Env(f) => f.to_string()
-  }
-}
-
-///|
-pub impl[A : Show] Show for Env[A] with output(self, logger) {
-  match self {
-    Env(f) => f.output(logger)
   }
 }
 
