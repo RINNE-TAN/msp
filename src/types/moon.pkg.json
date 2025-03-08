@@ -1,1 +1,8 @@
-{}
+{
+    "import": [
+        {
+            "path": "Yoorkin/prettyprinter",
+            "alias": "pp"
+        }
+    ]
+}

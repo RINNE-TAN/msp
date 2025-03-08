@@ -2,7 +2,8 @@
   "name": "kamome/msp",
   "version": "0.1.0",
   "deps": {
-    "illusory0x0/parserc": "0.1.1"
+    "illusory0x0/parserc": "0.1.1",
+    "Yoorkin/prettyprinter": "0.4.0"
   },
   "readme": "README.md",
   "repository": "",
