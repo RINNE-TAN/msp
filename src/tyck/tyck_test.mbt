@@ -85,6 +85,28 @@ test "tyck/lets" {
 }
 
 ///|
+test "tyck/if" {
+  let prog = @types.Prog::{
+    tops: [
+      @types.Top::{
+        name: "main",
+        expr: ELam(["input"], EIf(EVar("input"), ENum(0), ENum(1))),
+        ty: Rep(Arrow([Boolean], Integer)),
+      },
+    ],
+  }
+  let expected = @types.ProgComb::{
+    tops: [
+      {
+        name: "main",
+        expr: MkLam(["input"], MkIf(CVar("input"), MkNum(0), MkNum(1))),
+      },
+    ],
+  }
+  assert_eq!(checkProg!(prog), expected)
+}
+
+///|
 test "tyck/factorial" {
   let prog = @types.Prog::{
     tops: [

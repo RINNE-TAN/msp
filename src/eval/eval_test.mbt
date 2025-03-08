@@ -1,25 +1,10 @@
 ///|
-test "eval/power_stage" {
+test "eval/if" {
   let prog = @types.ProgComb::{
     tops: [
       {
-        name: "power",
-        expr: CLam(
-          ["x", "n"],
-          CIf(
-            CBinary(CVar("n"), Beq, CNum(0)),
-            MkNum(1),
-            MkBinary(
-              CVar("x"),
-              Mul,
-              CApp(CVar("power"), [CVar("x"), CBinary(CVar("n"), Sub, CNum(1))]),
-            ),
-          ),
-        ),
-      },
-      {
         name: "main",
-        expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
+        expr: MkLam(["input"], MkIf(CVar("input"), MkNum(0), MkNum(1))),
       },
     ],
   }
@@ -30,32 +15,26 @@ test "eval/power_stage" {
         expr: CLets(
           [
             (
-              "f_44",
+              "f_3",
               CLam(
                 ["input"],
                 CLets(
                   [
-                    ("i_30", CNum(1)),
-                    ("x_31", CBinary(CVar("input"), Mul, CVar("i_30"))),
-                    ("x_32", CBinary(CVar("input"), Mul, CVar("x_31"))),
-                    ("x_33", CBinary(CVar("input"), Mul, CVar("x_32"))),
-                    ("x_34", CBinary(CVar("input"), Mul, CVar("x_33"))),
-                    ("x_35", CBinary(CVar("input"), Mul, CVar("x_34"))),
-                    ("x_36", CBinary(CVar("input"), Mul, CVar("x_35"))),
-                    ("x_37", CBinary(CVar("input"), Mul, CVar("x_36"))),
-                    ("x_38", CBinary(CVar("input"), Mul, CVar("x_37"))),
-                    ("x_39", CBinary(CVar("input"), Mul, CVar("x_38"))),
-                    ("x_40", CBinary(CVar("input"), Mul, CVar("x_39"))),
-                    ("x_41", CBinary(CVar("input"), Mul, CVar("x_40"))),
-                    ("x_42", CBinary(CVar("input"), Mul, CVar("x_41"))),
-                    ("x_43", CBinary(CVar("input"), Mul, CVar("x_42"))),
+                    (
+                      "x_2",
+                      CIf(
+                        CVar("input"),
+                        CLets([("i_0", CNum(0))], CVar("i_0")),
+                        CLets([("i_1", CNum(1))], CVar("i_1")),
+                      ),
+                    ),
                   ],
-                  CVar("x_43"),
+                  CVar("x_2"),
                 ),
               ),
             ),
           ],
-          CVar("f_44"),
+          CVar("f_3"),
         ),
       },
     ],
@@ -118,17 +97,17 @@ test "eval/power_stage_square" {
         expr: CLets(
           [
             (
-              "f_66",
+              "f_1",
               CLam(
                 ["x"],
                 CLets(
-                  [("x_65", CBinary(CVar("x"), Mul, CVar("x")))],
-                  CVar("x_65"),
+                  [("x_0", CBinary(CVar("x"), Mul, CVar("x")))],
+                  CVar("x_0"),
                 ),
               ),
             ),
           ],
-          CVar("f_66"),
+          CVar("f_1"),
         ),
       },
       {
@@ -136,28 +115,50 @@ test "eval/power_stage_square" {
         expr: CLets(
           [
             (
-              "f_94",
+              "f_7",
               CLam(
                 ["input"],
                 CLets(
                   [
-                    ("i_87", CNum(1)),
-                    ("x_88", CBinary(CVar("input"), Mul, CVar("i_87"))),
-                    ("x_89", CApp(CVar("square"), [CVar("x_88")])),
-                    ("x_90", CBinary(CVar("input"), Mul, CVar("x_89"))),
-                    ("x_91", CApp(CVar("square"), [CVar("x_90")])),
-                    ("x_92", CApp(CVar("square"), [CVar("x_91")])),
-                    ("x_93", CBinary(CVar("input"), Mul, CVar("x_92"))),
+                    ("i_0", CNum(1)),
+                    ("x_1", CBinary(CVar("input"), Mul, CVar("i_0"))),
+                    ("x_2", CApp(CVar("square"), [CVar("x_1")])),
+                    ("x_3", CBinary(CVar("input"), Mul, CVar("x_2"))),
+                    ("x_4", CApp(CVar("square"), [CVar("x_3")])),
+                    ("x_5", CApp(CVar("square"), [CVar("x_4")])),
+                    ("x_6", CBinary(CVar("input"), Mul, CVar("x_5"))),
                   ],
-                  CVar("x_93"),
+                  CVar("x_6"),
                 ),
               ),
             ),
           ],
-          CVar("f_94"),
+          CVar("f_7"),
         ),
       },
     ],
   }
   assert_eq!(evalProg!(prog), expected)
+}
+
+///|
+test "eval/error_self_circular" {
+  let prog = @types.ProgComb::{ tops: [{ name: "main", expr: CVar("main") }] }
+  inspect!(evalProg?(prog), content="Err(CircularReference(vars=[\"main\"]))")
+}
+
+///|
+test "eval/error_multi_circular" {
+  let prog = @types.ProgComb::{
+    tops: [
+      { name: "a", expr: CVar("b") },
+      { name: "b", expr: CVar("a") },
+      { name: "c", expr: CNum(0) },
+      { name: "d", expr: CLam(["x"], CVar("a")) },
+    ],
+  }
+  inspect!(
+    evalProg?(prog),
+    content="Err(CircularReference(vars=[\"a\", \"b\"]))",
+  )
 }

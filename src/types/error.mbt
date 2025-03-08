@@ -6,5 +6,5 @@ pub(all) type! StageError {
   CrossStagePersistence(var~ : Ident)
   StageAntiControl(var~ : Ident)
   ArgNumMissmatch
-  CircularReference
+  CircularReference(vars~ : Array[Ident])
 } derive(Show)

@@ -24,7 +24,7 @@ fn topGamma(prog : @types.ProgComb) -> Env[V]!Error {
   while true {
     let remainTops = tops.filter_map(fn {
       top =>
-        match eval?(Env::empty(), topGamma, top.expr) {
+        match eval?(Env::empty(), topGamma, @utils.Fresher::new(), top.expr) {
           Ok(value) => {
             topGamma = topGamma.extend(top.name, value)
             None
@@ -40,13 +40,13 @@ fn topGamma(prog : @types.ProgComb) -> Env[V]!Error {
   if tops.is_empty() {
     topGamma
   } else {
-    raise @types.CircularReference
+    raise @types.CircularReference(vars=tops.map(fn { top => top.name }))
   }
 }
 
 ///|
 fn evalTop(topGamma : Env[V], top : @types.TopComb) -> @types.TopComb?!Error {
-  reify(eval!(Env::empty(), topGamma, top.expr)).map(fn {
+  reify(eval!(Env::empty(), topGamma, @utils.Fresher::new(), top.expr)).map(fn {
     expr => @types.TopComb::{ name: top.name, expr }
   })
 }
@@ -60,7 +60,12 @@ fn reify(value : V) -> In? {
 }
 
 ///|
-fn eval(gamma : Env[V], topGamma : Env[V], term : In) -> V!Error {
+fn eval(
+  gamma : Env[V],
+  topGamma : Env[V],
+  fresher : @utils.Fresher,
+  term : In
+) -> V!Error {
   match term {
     CVar(x) =>
       match gamma.get?(x) {
@@ -75,31 +80,35 @@ fn eval(gamma : Env[V], topGamma : Env[V], term : In) -> V!Error {
     CNum(i) => VNum(i)
     CLam(xs, t) => VClosure(xs, t, gamma)
     CApp(f, args) => {
-      let argVs = @utils.mapM!(args, fn { arg => eval!(gamma, topGamma, arg) })
-      match eval!(gamma, topGamma, f) {
+      let argVs = @utils.mapM!(args, fn {
+        arg => eval!(gamma, topGamma, fresher, arg)
+      })
+      match eval!(gamma, topGamma, fresher, f) {
         VClosure(xs, t, gamma) => {
           let newGamma = @utils.zip(xs, argVs).fold(init=gamma, fn {
             gamma, (x, argV) => gamma.extend(x, argV)
           })
-          eval!(newGamma, topGamma, t)
+          eval!(newGamma, topGamma, fresher, t)
         }
         _ => abort("unreachable")
       }
     }
     CLets(binds, t) => {
       let newGamma = @utils.foldM!(binds, init=gamma, fn {
-        gamma, (x, bind) => gamma.extend(x, eval!(gamma, topGamma, bind))
+        gamma, (x, bind) =>
+          gamma.extend(x, eval!(gamma, topGamma, fresher, bind))
       })
-      eval!(newGamma, topGamma, t)
+      eval!(newGamma, topGamma, fresher, t)
     }
     CIf(cond, b0, b1) =>
-      match eval!(gamma, topGamma, cond) {
-        VBool(true) => eval!(gamma, topGamma, b0)
-        VBool(false) => eval!(gamma, topGamma, b1)
+      match eval!(gamma, topGamma, fresher, cond) {
+        VBool(true) => eval!(gamma, topGamma, fresher, b0)
+        VBool(false) => eval!(gamma, topGamma, fresher, b1)
         _ => abort("unreachable")
       }
     CBinary(l, op, r) =>
-      match (eval!(gamma, topGamma, l), eval!(gamma, topGamma, r)) {
+      match
+        (eval!(gamma, topGamma, fresher, l), eval!(gamma, topGamma, fresher, r)) {
         (VNum(lV), VNum(rV)) =>
           match op {
             Add => VNum(lV + rV)
@@ -117,27 +126,27 @@ fn eval(gamma : Env[V], topGamma : Env[V], term : In) -> V!Error {
         _ => panic()
       }
     MkBool(b) => {
-      let x = @utils.fresh("b")
+      let x = fresher.fresh("b")
       VCode([(x, CBool(b))], x)
     }
     MkNum(i) => {
-      let x = @utils.fresh("i")
+      let x = fresher.fresh("i")
       VCode([(x, CNum(i))], x)
     }
     MkLam(xs, t) => {
       let newGamma = xs.fold(init=gamma, fn {
         gamma, x => gamma.extend(x, VCode([], x))
       })
-      let (Effs(effs), tZ) = eval!(newGamma, topGamma, t).castVCode()
-      let f = @utils.fresh("f")
+      let (Effs(effs), tZ) = eval!(newGamma, topGamma, fresher, t).castVCode()
+      let f = fresher.fresh("f")
       VCode([(f, CLam(xs, CLets(effs, CVar(tZ))))], f)
     }
     MkApp(f, args) => {
-      let (eff0, fZ) = eval!(gamma, topGamma, f).castVCode()
+      let (eff0, fZ) = eval!(gamma, topGamma, fresher, f).castVCode()
       let argsCode = @utils.mapM!(args, fn {
-        arg => eval!(gamma, topGamma, arg).castVCode()
+        arg => eval!(gamma, topGamma, fresher, arg).castVCode()
       })
-      let x = @utils.fresh("x")
+      let x = fresher.fresh("x")
       VCode(
         argsCode.fold(init=eff0, fn { effSum, (eff, _) => effSum + eff }) +
         [(x, CApp(CVar(fZ), argsCode.map(fn { (_, argZ) => CVar(argZ) })))],
@@ -146,10 +155,10 @@ fn eval(gamma : Env[V], topGamma : Env[V], term : In) -> V!Error {
     }
     MkLets(_) => abort("unfinished")
     MkIf(cond, b0, b1) => {
-      let (effs, condZ) = eval!(gamma, topGamma, cond).castVCode()
-      let (Effs(effs0), b0Z) = eval!(gamma, topGamma, b0).castVCode()
-      let (Effs(effs1), b1Z) = eval!(gamma, topGamma, b1).castVCode()
-      let x = @utils.fresh("x")
+      let (effs, condZ) = eval!(gamma, topGamma, fresher, cond).castVCode()
+      let (Effs(effs0), b0Z) = eval!(gamma, topGamma, fresher, b0).castVCode()
+      let (Effs(effs1), b1Z) = eval!(gamma, topGamma, fresher, b1).castVCode()
+      let x = fresher.fresh("x")
       VCode(
         effs +
         [
@@ -162,9 +171,9 @@ fn eval(gamma : Env[V], topGamma : Env[V], term : In) -> V!Error {
       )
     }
     MkBinary(l, op, r) => {
-      let (effs0, lZ) = eval!(gamma, topGamma, l).castVCode()
-      let (effs1, rZ) = eval!(gamma, topGamma, r).castVCode()
-      let x = @utils.fresh("x")
+      let (effs0, lZ) = eval!(gamma, topGamma, fresher, l).castVCode()
+      let (effs1, rZ) = eval!(gamma, topGamma, fresher, r).castVCode()
+      let x = fresher.fresh("x")
       VCode(effs0 + effs1 + [(x, CBinary(CVar(lZ), op, CVar(rZ)))], x)
     }
   }
