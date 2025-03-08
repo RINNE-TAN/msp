@@ -1,0 +1,9 @@
+{
+    "import": [
+        {
+            "path": "illusory0x0/parserc",
+            "alias": "combinator"
+        },
+        "kamome/msp/types"
+    ]
+}

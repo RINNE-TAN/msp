@@ -4,7 +4,7 @@ test "eval/if" {
     tops: [
       {
         name: "main",
-        expr: MkLam(["input"], MkIf(CVar("input"), MkNum(0), MkNum(1))),
+        expr: MkLam(["input"], MkIf(CVar("input"), MkBool(true), MkBool(false))),
       },
     ],
   }
@@ -24,8 +24,8 @@ test "eval/if" {
                       "x_2",
                       CIf(
                         CVar("input"),
-                        CLets([("i_0", CNum(0))], CVar("i_0")),
-                        CLets([("i_1", CNum(1))], CVar("i_1")),
+                        CLets([("b_0", CBool(true))], CVar("b_0")),
+                        CLets([("b_1", CBool(false))], CVar("b_1")),
                       ),
                     ),
                   ],

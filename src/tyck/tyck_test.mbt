@@ -90,8 +90,8 @@ test "tyck/if" {
     tops: [
       @types.Top::{
         name: "main",
-        expr: ELam(["input"], EIf(EVar("input"), ENum(0), ENum(1))),
-        ty: Rep(Arrow([Boolean], Integer)),
+        expr: ELam(["input"], EIf(EVar("input"), EBool(true), EBool(false))),
+        ty: Rep(Arrow([Boolean], Boolean)),
       },
     ],
   }
@@ -99,7 +99,7 @@ test "tyck/if" {
     tops: [
       {
         name: "main",
-        expr: MkLam(["input"], MkIf(CVar("input"), MkNum(0), MkNum(1))),
+        expr: MkLam(["input"], MkIf(CVar("input"), MkBool(true), MkBool(false))),
       },
     ],
   }

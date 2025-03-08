@@ -34,8 +34,13 @@ jobs:
           moon version --all
           moonrun --version
 
+      - name: install deps
+        run: | 
+          moon update
+          moon install
+
       - name: moon check
-        run: moon check --deny-warn
+        run: moon check
 
       - name: moon info
         run: |
@@ -127,8 +132,13 @@ jobs:
           moon version --all
           moonrun --version
 
+      - name: install deps
+        run: | 
+          moon update
+          moon install
+          
       - name: moon check
-        run: moon check --deny-warn
+        run: moon check
 
       - name: Set ulimit and run moon test
         if: ${{ matrix.os != 'windows-latest' }}
@@ -173,8 +183,13 @@ jobs:
           moon version --all
           moonrun --version
 
+      - name: install deps
+        run: | 
+          moon update
+          moon install
+      
       - name: moon check
-        run: moon check --deny-warn
+        run: moon check
 
       - name: Set ulimit and run moon test
         run: |

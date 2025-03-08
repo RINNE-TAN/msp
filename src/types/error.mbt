@@ -7,4 +7,5 @@ pub(all) type! StageError {
   StageAntiControl(var~ : Ident)
   ArgNumMismatch
   CircularReference(vars~ : Array[Ident])
+  LexerRemain(remain~ : String)
 } derive(Show)
