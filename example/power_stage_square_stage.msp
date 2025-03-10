@@ -2,7 +2,7 @@ even : (int) => bool =
   lambda x.
     x % 2 == 0 
       
-square : (<int>) => <int> = 
+square : <(int) => int> = 
   lambda x.
     x * x
 

@@ -28,7 +28,7 @@ even : (int) => bool =
   lambda x.
     x % 2 == 0 
       
-square : <(int) => int> = 
+square : (<int>) => <int> = 
   lambda x.
     x * x
 
@@ -56,24 +56,16 @@ moon run src/main -- example/power_stage_square.msp
 The output will be saved in the [output/power_stage_square_out.msp](output/power_stage_square_out.msp)
 
 ```ocaml
-square : (int) => int =
-  let
-    f_1 = lambda x.
-      let
-        x_0 = (x * x)
-      in x_0
-  in f_1
-
 main : (int) => int =
   let
     f_7 = lambda input.
       let
         i_0 = 1
         x_1 = (input * i_0)
-        x_2 = square(x_1)
+        x_2 = (x_1 * x_1)
         x_3 = (input * x_2)
-        x_4 = square(x_3)
-        x_5 = square(x_4)
+        x_4 = (x_3 * x_3)
+        x_5 = (x_4 * x_4)
         x_6 = (input * x_5)
       in x_6
   in f_7
