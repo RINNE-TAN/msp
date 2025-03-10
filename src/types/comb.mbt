@@ -7,6 +7,7 @@ pub(all) struct ProgComb {
 pub(all) struct TopComb {
   name : Ident
   expr : Comb
+  ty : Ty
 } derive(Show, Eq)
 
 ///|
@@ -36,6 +37,10 @@ pub impl @pp.Pretty for ProgComb with pretty(prog : ProgComb) {
 ///|
 pub impl @pp.Pretty for TopComb with pretty(top : TopComb) {
   @pp.text(top.name) +
+  @pp.space +
+  @pp.char(':') +
+  @pp.space +
+  top.ty.pretty() +
   @pp.space +
   @pp.char('=') +
   @pp.nest(@pp.hardline + top.expr.pretty())

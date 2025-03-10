@@ -22,6 +22,14 @@ test "pretty/op" {
 }
 
 ///|
+test "pretty/ty" {
+  let ty0 : Ty = Rep(Arrow([Integer, Integer], Boolean))
+  let ty1 : Ty = Arrow([Integer, Integer], Arrow([Integer, Unknown], Boolean))
+  assert_eq!(ty0.pretty().to_string(), "<(int, int) => bool>")
+  assert_eq!(ty1.pretty().to_string(), "(int, int) => (int, ?) => bool")
+}
+
+///|
 test "pretty/power_stage_square" {
   let prog = @types.ProgComb::{
     tops: [
@@ -42,6 +50,7 @@ test "pretty/power_stage_square" {
           ],
           CVar("f_1"),
         ),
+        ty: Arrow([Integer], Integer),
       },
       {
         name: "main",
@@ -68,11 +77,12 @@ test "pretty/power_stage_square" {
           ],
           CVar("f_7"),
         ),
+        ty: Arrow([Integer], Integer),
       },
     ],
   }
   let expected =
-    #|square =
+    #|square : (int) => int =
     #|  let
     #|    f_1 = lambda x.
     #|      let
@@ -80,7 +90,7 @@ test "pretty/power_stage_square" {
     #|      in x_0
     #|  in f_1
     #|
-    #|main =
+    #|main : (int) => int =
     #|  let
     #|    f_7 = lambda input.
     #|      let
@@ -126,11 +136,12 @@ test "pretty/if" {
           ],
           CVar("f_3"),
         ),
+        ty: Arrow([Boolean], Boolean),
       },
     ],
   }
   let expected =
-    #|main =
+    #|main : (bool) => bool =
     #|  let
     #|    f_3 = lambda input.
     #|      let

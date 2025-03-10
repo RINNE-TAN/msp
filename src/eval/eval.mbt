@@ -46,9 +46,20 @@ fn topGamma(prog : @types.ProgComb) -> Env[V]!Error {
 
 ///|
 fn evalTop(topGamma : Env[V], top : @types.TopComb) -> @types.TopComb?!Error {
-  reify(eval!(Env::empty(), topGamma, @utils.Fresher::new(), top.expr)).map(fn {
-    expr => @types.TopComb::{ name: top.name, expr }
+  reify(eval!(Env::empty(), topGamma, @utils.Fresher::new(), top.expr)).bind(fn {
+    expr =>
+      reifyTy(top.ty).bind(fn {
+        ty => Some(@types.TopComb::{ name: top.name, expr, ty })
+      })
   })
+}
+
+///|
+fn reifyTy(ty : @types.Ty) -> @types.Ty? {
+  match ty {
+    Rep(ty) => Some(ty)
+    _ => None
+  }
 }
 
 ///|

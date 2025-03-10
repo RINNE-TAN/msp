@@ -1,4 +1,4 @@
-square =
+square : (int) => int =
   let
     f_1 = lambda x.
       let
@@ -6,7 +6,7 @@ square =
       in x_0
   in f_1
 
-main =
+main : (int) => int =
   let
     f_7 = lambda input.
       let

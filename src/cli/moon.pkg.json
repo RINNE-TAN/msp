@@ -5,8 +5,7 @@
             "alias": "arg"
         },
         {
-            "path": "Yoorkin/prettyprinter",
-            "alias": "pp"
+            "path": "Yoorkin/prettyprinter"
         },
         "moonbitlang/x/fs",
         "kamome/msp/parser",

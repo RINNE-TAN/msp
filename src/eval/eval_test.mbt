@@ -5,6 +5,7 @@ test "eval/if" {
       {
         name: "main",
         expr: MkLam(["input"], MkIf(CVar("input"), MkBool(true), MkBool(false))),
+        ty: Rep(Arrow([Boolean], Boolean)),
       },
     ],
   }
@@ -36,6 +37,7 @@ test "eval/if" {
           ],
           CVar("f_3"),
         ),
+        ty: Arrow([Boolean], Boolean),
       },
     ],
   }
@@ -52,10 +54,12 @@ test "eval/power_stage_square" {
           ["x"],
           CBinary(CBinary(CVar("x"), Mod, CNum(2)), Beq, CNum(0)),
         ),
+        ty: Arrow([Integer], Boolean),
       },
       {
         name: "square",
         expr: MkLam(["x"], MkBinary(CVar("x"), Mul, CVar("x"))),
+        ty: Rep(Arrow([Integer], Integer)),
       },
       {
         name: "power",
@@ -83,10 +87,12 @@ test "eval/power_stage_square" {
             ),
           ),
         ),
+        ty: Arrow([Rep(Integer), Integer], Rep(Integer)),
       },
       {
         name: "main",
         expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
+        ty: Rep(Arrow([Integer], Integer)),
       },
     ],
   }
@@ -109,6 +115,7 @@ test "eval/power_stage_square" {
           ],
           CVar("f_1"),
         ),
+        ty: Arrow([Integer], Integer),
       },
       {
         name: "main",
@@ -135,6 +142,7 @@ test "eval/power_stage_square" {
           ],
           CVar("f_7"),
         ),
+        ty: Arrow([Integer], Integer),
       },
     ],
   }
@@ -143,7 +151,9 @@ test "eval/power_stage_square" {
 
 ///|
 test "eval/error_self_circular" {
-  let prog = @types.ProgComb::{ tops: [{ name: "main", expr: CVar("main") }] }
+  let prog = @types.ProgComb::{
+    tops: [{ name: "main", expr: CVar("main"), ty: Integer }],
+  }
   inspect!(evalProg?(prog), content="Err(CircularReference(vars=[\"main\"]))")
 }
 
@@ -151,10 +161,10 @@ test "eval/error_self_circular" {
 test "eval/error_multi_circular" {
   let prog = @types.ProgComb::{
     tops: [
-      { name: "a", expr: CVar("b") },
-      { name: "b", expr: CVar("a") },
-      { name: "c", expr: CNum(0) },
-      { name: "d", expr: CLam(["x"], CVar("a")) },
+      { name: "a", expr: CVar("b"), ty: Integer },
+      { name: "b", expr: CVar("a"), ty: Integer },
+      { name: "c", expr: CNum(0), ty: Integer },
+      { name: "d", expr: CLam(["x"], CVar("a")), ty: Arrow([Integer], Integer) },
     ],
   }
   inspect!(

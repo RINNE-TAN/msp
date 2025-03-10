@@ -1,4 +1,4 @@
-main =
+main : (int) => int =
   let
     f_14 = lambda input.
       let

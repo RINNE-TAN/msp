@@ -16,8 +16,12 @@ test "tyck/lambda" {
   }
   let expected = @types.ProgComb::{
     tops: [
-      { name: "id42", expr: CLam(["x"], CNum(42)) },
-      { name: "main", expr: CVar("id42") },
+      {
+        name: "id42",
+        expr: CLam(["x"], CNum(42)),
+        ty: Arrow([Integer], Integer),
+      },
+      { name: "main", expr: CVar("id42"), ty: Arrow([Integer], Integer) },
     ],
   }
   assert_eq!(checkProg!(prog), expected)
@@ -41,8 +45,12 @@ test "tyck/app" {
   }
   let expected = @types.ProgComb::{
     tops: [
-      { name: "id42", expr: CLam(["x"], CNum(42)) },
-      { name: "main", expr: CApp(CVar("id42"), [CNum(13)]) },
+      {
+        name: "id42",
+        expr: CLam(["x"], CNum(42)),
+        ty: Arrow([Integer], Integer),
+      },
+      { name: "main", expr: CApp(CVar("id42"), [CNum(13)]), ty: Integer },
     ],
   }
   assert_eq!(checkProg!(prog), expected)
@@ -78,6 +86,7 @@ test "tyck/lets" {
           ],
           CVar("x2"),
         ),
+        ty: Boolean,
       },
     ],
   }
@@ -100,6 +109,7 @@ test "tyck/if" {
       {
         name: "main",
         expr: MkLam(["input"], MkIf(CVar("input"), MkBool(true), MkBool(false))),
+        ty: Rep(Arrow([Boolean], Boolean)),
       },
     ],
   }
@@ -149,8 +159,9 @@ test "tyck/factorial" {
             ),
           ),
         ),
+        ty: Arrow([Integer], Integer),
       },
-      { name: "main", expr: CApp(CVar("factorial"), [CNum(13)]) },
+      { name: "main", expr: CApp(CVar("factorial"), [CNum(13)]), ty: Integer },
     ],
   }
   assert_eq!(checkProg!(prog), expected)
@@ -199,8 +210,13 @@ test "tyck/power" {
             ),
           ),
         ),
+        ty: Arrow([Integer, Integer], Integer),
       },
-      { name: "main", expr: CApp(CVar("power"), [CNum(2), CNum(13)]) },
+      {
+        name: "main",
+        expr: CApp(CVar("power"), [CNum(2), CNum(13)]),
+        ty: Integer,
+      },
     ],
   }
   assert_eq!(checkProg!(prog), expected)
@@ -249,10 +265,12 @@ test "tyck/power_stage" {
             ),
           ),
         ),
+        ty: Arrow([Rep(Integer), Integer], Rep(Integer)),
       },
       {
         name: "main",
         expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
+        ty: Rep(Arrow([Integer], Integer)),
       },
     ],
   }
@@ -307,10 +325,12 @@ test "tyck/power_stage_square" {
           ["x"],
           CBinary(CBinary(CVar("x"), Mod, CNum(2)), Beq, CNum(0)),
         ),
+        ty: Arrow([Integer], Boolean),
       },
       {
         name: "square",
         expr: MkLam(["x"], MkBinary(CVar("x"), Mul, CVar("x"))),
+        ty: Rep(Arrow([Integer], Integer)),
       },
       {
         name: "power",
@@ -338,10 +358,12 @@ test "tyck/power_stage_square" {
             ),
           ),
         ),
+        ty: Arrow([Rep(Integer), Integer], Rep(Integer)),
       },
       {
         name: "main",
         expr: MkLam(["input"], CApp(CVar("power"), [CVar("input"), CNum(13)])),
+        ty: Rep(Arrow([Integer], Integer)),
       },
     ],
   }

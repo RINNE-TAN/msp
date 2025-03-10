@@ -56,7 +56,7 @@ moon run src/main -- example/power_stage_square.msp
 The output will be saved in the [output/power_stage_square_out.msp](output/power_stage_square_out.msp)
 
 ```ocaml
-square =
+square : (int) => int =
   let
     f_1 = lambda x.
       let
@@ -64,7 +64,7 @@ square =
       in x_0
   in f_1
 
-main =
+main : (int) => int =
   let
     f_7 = lambda input.
       let

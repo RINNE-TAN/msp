@@ -28,7 +28,7 @@ pub fn checkProg(prog : @types.Prog) -> @types.ProgComb!Error {
 ///|
 fn checkTop(top : @types.Top, fnGamma : Env[Ty]) -> @types.TopComb!Error {
   let exprC = check!(Env::empty(), fnGamma, Static, top.expr, top.ty)
-  @types.TopComb::{ name: top.name, expr: exprC }
+  @types.TopComb::{ name: top.name, expr: exprC, ty: top.ty }
 }
 
 ///|
