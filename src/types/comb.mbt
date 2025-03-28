@@ -20,6 +20,7 @@ pub(all) enum Comb {
   CLets(Array[(Ident, Comb)], Comb)
   CIf(Comb, Comb, Comb)
   CBinary(Comb, BinOp, Comb)
+  MkVar(Ident)
   MkBool(Bool)
   MkNum(Int)
   MkLam(Array[Ident], Comb)

@@ -136,6 +136,13 @@ fn eval(
           }
         _ => panic()
       }
+    MkVar(x) =>
+      match gamma.get!(x) {
+        VBool(b) => eval!(gamma, topGamma, fresher, MkBool(b))
+        VNum(i) => eval!(gamma, topGamma, fresher, MkNum(i))
+        VClosure(_) => abort("unreachable")
+        VCode(_) => abort("unreachable")
+      }
     MkBool(b) => {
       let x = fresher.fresh("b")
       VCode([(x, CBool(b))], x)

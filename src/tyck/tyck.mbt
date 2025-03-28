@@ -102,12 +102,11 @@ fn check(
       }
     }
     EIf(cond, b0, b1) => {
-      let condC = check!(gamma, fnGamma, n, cond, Boolean)
       let b0C = check!(gamma, fnGamma, n, b0, expected)
       let b1C = check!(gamma, fnGamma, n, b1, expected)
-      match n {
-        Static => CIf(condC, b0C, b1C)
-        Dynamic => MkIf(condC, b0C, b1C)
+      match check?(gamma, fnGamma, Static, cond, Boolean) {
+        Ok(condC) => CIf(condC, b0C, b1C)
+        Err(_) => MkIf(check!(gamma, fnGamma, Dynamic, cond, Boolean), b0C, b1C)
       }
     }
     _ => {
@@ -143,7 +142,12 @@ fn infer(
         Ok((m, ty)) =>
           match (m, n) {
             (Static, Static) => (CVar(var), ty)
-            (Static, Dynamic) => raise @types.CrossStagePersistence(var~)
+            (Static, Dynamic) =>
+              match ty {
+                Integer | Boolean => (MkVar(var), ty)
+                Rep(_) | Arrow(_) => raise @types.CrossStagePersistence(var~)
+                Unknown => abort("unreachable")
+              }
             (Dynamic, Static) => raise @types.StageAntiControl(var~)
             (Dynamic, Dynamic) => (CVar(var), ty)
           }
