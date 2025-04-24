@@ -9,7 +9,7 @@ pub fn cli() -> Unit!Error {
     #|
   @arg.parse(
     [("--output", "-o", Set_string(output), "output file name")],
-    fn { path => if path.ends_with(".msp") { paths.push(path) } },
+    fn { path => if path.has_suffix(".msp") { paths.push(path) } },
     usage,
     @env.args(),
   )
@@ -28,13 +28,7 @@ pub fn cli() -> Unit!Error {
 
 ///|
 pub fn extract_name(path : String) -> String {
-  let last_slash = path.last_index_of("/", from=path.length())
-  let start = if last_slash >= 0 { last_slash + 1 } else { 0 }
+  let start = path.rev_find("/").map_or(0, fn(x) { x + 1 })
   let name = path.view(start_offset=start).to_string()
-  let dot_pos = name.index_of(".", from=0)
-  if dot_pos >= 0 {
-    name.view(end_offset=dot_pos).to_string()
-  } else {
-    name
-  }
+  name.find(".").map_or(name, fn(x) { name.view(end_offset=x).to_string() })
 }
