@@ -24,7 +24,7 @@ pub fn Value::castVCode(self : Value) -> (Effs, Ident) {
 pub(all) type Effs Array[(String, Comb)] derive(Eq, Show)
 
 ///|
-pub fn Effs::op_add(self : Effs, other : Effs) -> Effs {
+pub impl Add for Effs with op_add(self, other) -> Effs {
   match (self, other) {
     (Effs(binds0), Effs(binds1)) =>
       binds0 + binds1.filter(fn { eff => not(binds0.contains(eff)) })
